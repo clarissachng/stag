@@ -10,7 +10,6 @@ import java.util.ArrayList;
 class  StagServer {
     Player thePlayer;
     String firstLocation;
-
     GameState state = new GameState();
 
     public static void main(String[] args) {
@@ -26,7 +25,6 @@ class  StagServer {
     public StagServer(File entityFilename, File actionFilename, int portNumber) {
         GameParser parser = new GameParser(entityFilename, actionFilename, state);
         try {
-
             parser.parseAction();
             parser.parseEntity();
 
@@ -47,7 +45,9 @@ class  StagServer {
             Socket socket = ss.accept();
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-            processNextCommand(in);
+            String incomingCommand = in.readLine();
+            String result = processNextCommand(incomingCommand);
+            out.write(result);
             out.close();
             in.close();
             socket.close();
@@ -75,41 +75,40 @@ class  StagServer {
         return playerName;
     }
 
-    private String processNextCommand(BufferedReader in) throws IOException {
+    private String processNextCommand(String input) throws IOException
+    {
+        String returnStatement;
+        input = input.toLowerCase();
 
-        String input = in.readLine();
-        String returnStatement = "";
-
-        if (input.isEmpty()) {
+        if (command.isEmpty()) {
             System.out.println("Command is empty!");
         }
 
-        input = input.toLowerCase();
         try {
-
             String playerName = getPlayerName(input);
 
             // if the player is a new player, add the details for the game to start
-            if (state.playerExist(playerName)) {
-                this.firstLocation = state.getFirstLoc();
-                this.thePlayer = new Player(playerName, firstLocation); // out of scope
-                thePlayer.setPlayerLocation(firstLocation);
-                state.addPlayerIntoMap(playerName);
-                state.setCurrentPlayer(playerName);
-            } else {
-                thePlayer = state.getCurrentPlayer(playerName);
-                state.setPlayerHashMap(playerName, thePlayer);
+//            if (state.playerExist(playerName)) {
+            this.firstLocation = state.getFirstLoc();
+            this.thePlayer = new Player(playerName, firstLocation); // out of scope
 
-                // why cannot retrieve location after the else statement ;;
+            thePlayer.setPlayerLocation(firstLocation);
+            state.addPlayerIntoMap(playerName);
+            state.setCurrentPlayer(playerName);
+//            } else {
+//                player = state.getCurrentPlayer(playerName);
+//                state.setPlayerHashMap(playerName, thePlayer);
+
+            // why cannot retrieve location after the else statement ;;
 //            }
 
-                Command command = new Command(state, thePlayer);
-                returnStatement = command.basicCommand(input, thePlayer);
-                // if there is no match then look for action trigger words
-            }
-            return returnStatement;
-        } catch (RuntimeException e) {
+            Command command = new Command(state, thePlayer);
+            returnStatement = command.basicCommand(input, thePlayer);
+            // if there is no match then look for action trigger words
+
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
+        return returnStatement;
     }
 }

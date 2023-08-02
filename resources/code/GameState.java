@@ -42,8 +42,8 @@ public class GameState {
 
     // if the player alr exist, just get the player
     // from the hashmap itself and continue with the game
-    public Player getCurrentPlayer(String playerName) {
-        return playerHashMap.get(playerName);
+    public String getCurrentPlayer() {
+        return currentPlayer;
     }
 
     // check if the player is a new player or alr exist in the game
