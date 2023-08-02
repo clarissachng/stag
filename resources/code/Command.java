@@ -1,9 +1,11 @@
 import java.util.*;
 
 public class Command {
-    private final String playerLocationName;
+
     GameState state;
     Player player;
+    private final String playerLocationName;
+
     public Command(GameState state, Player player) {
         this.state = state;
         this.player = player;

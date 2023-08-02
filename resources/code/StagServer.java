@@ -7,13 +7,13 @@ import java.nio.Buffer;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
-class  StagServer
-{
+class  StagServer {
     Player thePlayer;
+    String firstLocation;
 
     GameState state = new GameState();
-    public static void main(String[] args)
-    {
+
+    public static void main(String[] args) {
 
 //        if(args.length != 2) System.out.println("Usage: java StagServer <entity-file> <action-file>");
 //        else new StagServer(args[0], args[1], 8888);
@@ -23,9 +23,7 @@ class  StagServer
         new StagServer(entityFilename, actionFilename, 8888);
     }
 
-    public StagServer(File entityFilename, File actionFilename, int portNumber)
-    {
-        this.thePlayer = new Player();
+    public StagServer(File entityFilename, File actionFilename, int portNumber) {
         GameParser parser = new GameParser(entityFilename, actionFilename, state);
         try {
 
@@ -35,16 +33,15 @@ class  StagServer
             // read entityFilename --> parse entity
             ServerSocket ss = new ServerSocket(portNumber);
             System.out.println("Server Listening");
-            while(true) acceptNextConnection(ss);
-        } catch(IOException ioe) {
+            while (true) acceptNextConnection(ss);
+        } catch (IOException ioe) {
             System.err.println(ioe);
         } catch (ParseException | ParserConfigurationException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private void acceptNextConnection(ServerSocket ss)
-    {
+    private void acceptNextConnection(ServerSocket ss) {
         try {
             // Next line will block until a connection is received
             Socket socket = ss.accept();
@@ -54,7 +51,7 @@ class  StagServer
             out.close();
             in.close();
             socket.close();
-        } catch(IOException ioe) {
+        } catch (IOException ioe) {
             System.err.println(ioe);
         }
     }
@@ -63,8 +60,8 @@ class  StagServer
     public String getPlayerName(String command) {
         int index = 0;
         String playerName = "";
-        for(int i =0; i < command.length(); i++) {
-            if(command.charAt(i) == ':') {
+        for (int i = 0; i < command.length(); i++) {
+            if (command.charAt(i) == ':') {
                 index = i;
                 break;
             }
@@ -78,8 +75,7 @@ class  StagServer
         return playerName;
     }
 
-    private String processNextCommand(BufferedReader in) throws IOException
-    {
+    private String processNextCommand(BufferedReader in) throws IOException {
 
         String input = in.readLine();
         String returnStatement = "";
@@ -90,30 +86,30 @@ class  StagServer
 
         input = input.toLowerCase();
         try {
-            Player player;
+
             String playerName = getPlayerName(input);
 
             // if the player is a new player, add the details for the game to start
-//            if (state.playerExist(playerName)) {
-                String firstLoc = state.getFirstLoc();
-                player = new Player(playerName, firstLoc); // out of scope
-                player.setPlayerLocation(firstLoc);
+            if (state.playerExist(playerName)) {
+                this.firstLocation = state.getFirstLoc();
+                this.thePlayer = new Player(playerName, firstLocation); // out of scope
+                thePlayer.setPlayerLocation(firstLocation);
                 state.addPlayerIntoMap(playerName);
                 state.setCurrentPlayer(playerName);
-//            } else {
-//                player = state.getCurrentPlayer(playerName);
-//                state.setPlayerHashMap(playerName, player);
+            } else {
+                thePlayer = state.getCurrentPlayer(playerName);
+                state.setPlayerHashMap(playerName, thePlayer);
 
-            // why cannot retrieve location after the else statement ;;
+                // why cannot retrieve location after the else statement ;;
 //            }
 
-            Command command = new Command(state, player);
-            returnStatement = command.basicCommand(input, player);
-        // if there is no match then look for action trigger words
-
-    } catch (Exception e) {
+                Command command = new Command(state, thePlayer);
+                returnStatement = command.basicCommand(input, thePlayer);
+                // if there is no match then look for action trigger words
+            }
+            return returnStatement;
+        } catch (RuntimeException e) {
             throw new RuntimeException(e);
         }
-        return returnStatement;
     }
 }
