@@ -80,7 +80,7 @@ class  StagServer {
         String returnStatement;
         input = input.toLowerCase();
 
-        if (command.isEmpty()) {
+        if (input.isEmpty()) {
             System.out.println("Command is empty!");
         }
 
@@ -94,12 +94,12 @@ class  StagServer {
 
             thePlayer.setPlayerLocation(firstLocation);
             state.addPlayerIntoMap(playerName);
-            state.setCurrentPlayer(playerName);
+            state.setCurrentPlayer(thePlayer);
 //            } else {
-//                player = state.getCurrentPlayer(playerName);
+//                thePlayer = state.getCurrentPlayer();
 //                state.setPlayerHashMap(playerName, thePlayer);
-
-            // why cannot retrieve location after the else statement ;;
+//
+//            // why cannot retrieve location after the else statement ;;
 //            }
 
             Command command = new Command(state, thePlayer);

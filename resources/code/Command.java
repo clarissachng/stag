@@ -32,37 +32,30 @@ public class Command {
         ArrayList<String> splitMessage = splitCommand(command);
 
         if (checkIsBasicCommand(splitMessage)) {
-//            System.out.println("Is Basic Command");
             for (String s : splitMessage) {
                 switch(s) {
                     case "inventory" -> {
                         output = "inventory";
-//                        System.out.println(output);
                         return output;
                     }
                     case "inv" -> {
                         output = "inv";
-//                        System.out.println(output);
                         return output;
                     }
                     case "get" -> {
                         output = "get";
-//                        System.out.println(output);
                         return output;
                     }
                     case "goto" -> {
                         output = "goto";
-//                        System.out.println(output);
                         return output;
                     }
                     case "drop" -> {
                         output = "drop";
-//                        System.out.println(output);
                         return  output;
                     }
                     case "look" -> {
                         output = "look";
-//                        System.out.println(output);
                         return output;
                     }
                 }
@@ -77,23 +70,18 @@ public class Command {
 
         switch (triggerCommand) {
             case "inv", "inventory" -> {
-//                System.out.println("Going to invCommand");
                 return invCommand(player);
             }
             case "get" -> {
-//                System.out.println("Going to getCommand");
-                return getCommand(player);
+                return getCommand(player, command);
             }
             case "drop" -> {
-//                System.out.println("Going to dropCommand");
                 return dropCommand(player);
             }
             case "goto" -> {
-//                System.out.println("Going to gotoCommand");
-                return gotoCommand(player);
+                return gotoCommand(player, command);
             }
             case "look" -> {
-//                System.out.println("Going to lookCommand");
                 return lookCommand();
             }
             default -> {
@@ -115,9 +103,6 @@ public class Command {
     // get currloc
     // get artefacts from location
 
-    public Artefact getArtefactFromCurrLocation() {
-        return null;
-    }
     private void showAllEntity(Location currentLoc, StringBuilder output) {
         ArrayList<Artefact> currLocArtefact = currentLoc.getArtefact();
         showCurrentArtefact(currLocArtefact, output);
@@ -169,24 +154,26 @@ public class Command {
     }
 
     public String invCommand(Player player) {
-        System.out.println("reached inv command");
 
         // get player's inventory
         ArrayList<Artefact> invArtefacts = player.getPlayerInv();
         StringBuilder invOutput = new StringBuilder();
-        invOutput.append("You have these items in inventory: \n");
+        if (!invArtefacts.isEmpty()) {
+            invOutput.append("You have these items in inventory: \n");
 
-        // print out player's inventory
-        for (Artefact artefact: invArtefacts) {
-            invOutput.append(artefact.getDescription());
-            invOutput.append("\n");
+            // print out player's inventory
+            for (Artefact artefact: invArtefacts) {
+                invOutput.append(artefact.getDescription());
+                invOutput.append("\n");
+            }
         }
-        System.out.println(invOutput);
+        else {
+            invOutput.append("Your inventory is empty :(\n");
+        }
         return invOutput.toString();
     }
 
-    public String getCommand(Player player) {
-        System.out.println("reached get command");
+    public String getCommand(Player player, String command) {
         // get current player location
         Location currentLoc = getCurrLocation();
         StringBuilder getOutput = new StringBuilder();
@@ -194,27 +181,25 @@ public class Command {
         // check if entity exists in location
         // remove artefact from location
         // add artefact in player inv
-        for(Artefact artefact: currentLoc.getArtefact()) {
-            String artefactName = String.valueOf(artefact);
+        for(String artefactName: splitCommand(command)) {
             if(currentLoc.checkIfArtefactExist(artefactName)) {
                 Artefact getArtefact = currentLoc.getArtefactByName(artefactName);
                 currentLoc.removeArtefacts(getArtefact);
                 player.addArtefactToPlayerInv(getArtefact);
                 getOutput.append("You picked up a ");
                 getOutput.append(artefactName);
-                System.out.println(getOutput);
+//                System.out.println(getOutput);
                 return getOutput.toString();
             }
         }
 
         // error handling: if artefact doesnt exist, print error
         // TO DO!
-        System.out.println("Failed to find the artefact in current location\n");
+//        System.out.println("Failed to find the artefact in current location\n");
         return null;
     }
 
     public String dropCommand(Player player) {
-        System.out.println("reached drop command");
         Location currentLoc = getCurrLocation();
         StringBuilder dropOutput = new StringBuilder();
 
@@ -229,44 +214,43 @@ public class Command {
                 dropOutput.append(artefactName);
             }
         }
-        System.out.println(dropOutput);
-        System.out.println("Failed to find the artefact in player's inventory\n");
         return dropOutput.toString();
     }
 
-    public String gotoCommand(Player player) {
-        System.out.println("reached goto command");
+    public String gotoCommand(Player player, String command) {
         Location currentLoc = getCurrLocation();
         StringBuilder gotoOutput = new StringBuilder();
-        String locationName = currentLoc.getName();
 
-        if(currentLoc.checkIfPathsExist(locationName)) {
-            player.setPlayerLocation(locationName);
-            Location newLocation = getNewLocation(locationName);
-            gotoOutput.append("You are in ");
-            gotoOutput.append(newLocation.getDescription()).append(". ");
-            gotoOutput.append("You can see:");
-            gotoOutput.append("\n");
-            showAllEntity(newLocation, gotoOutput);
-
+        // get i = 2 (target) for locationName
+        for(String locationName: splitCommand(command)) {
+            if(currentLoc.checkIfPathsExist(locationName)) {
+                player.setPlayerLocation(locationName);
+                Location newLocation = getNewLocation(locationName);
+                gotoOutput.append("You are in: \n");
+                gotoOutput.append(newLocation.getDescription()).append("\n");
+                gotoOutput.append("You can see: ");
+                gotoOutput.append("\n");
+                showAllEntity(newLocation, gotoOutput);
+            }
         }
-        System.out.println(gotoOutput);
-        System.out.println("Failed to location new location in path\n");
+
+
+//        System.out.println(gotoOutput);
+//        System.out.println("Failed to location new location in path\n");
         return gotoOutput.toString();
     }
 
     public String lookCommand() {
-        System.out.println("reached look command");
+//        System.out.println("reached look command");
         // get player location -> get entities from location
         Location currLocation = getCurrLocation(); // use updated
         StringBuilder lookOutput = new StringBuilder();
 
-        lookOutput.append("You are in ");
-        lookOutput.append(currLocation.getDescription()).append(". ");
-        lookOutput.append("You can see: ");
+        lookOutput.append("You are in: \n");
+        lookOutput.append(currLocation.getDescription()).append("\n");
+        lookOutput.append("You can see: \n");
         showAllEntity(currLocation, lookOutput);
 
-        System.out.println("Failed to execute look command\n");
         return lookOutput.toString();
     }
 }
