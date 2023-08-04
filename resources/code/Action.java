@@ -11,7 +11,6 @@ public class Action {
 //    list produced
             // check whether the trigger word is there --> check the subject
     // if the conditions are checked --> produces and consumed + narration
-    private ArrayList<String> actions = new ArrayList<>();
     private ArrayList<String> subjects = new ArrayList<>();
     private ArrayList<String> consumed = new ArrayList<>();
     private ArrayList<String> produced = new ArrayList<>();

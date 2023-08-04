@@ -4,7 +4,7 @@ public class Command {
 
     GameState state;
     Player player;
-    private final String playerLocationName;
+    String playerLocationName;
 
     public Command(GameState state, Player player) {
         this.state = state;
@@ -13,7 +13,6 @@ public class Command {
         this.playerLocationName = player.getPlayerLocation();
     }
 
-    //--------------------------- COMMAND HANDLING ---------------------------//
     public boolean checkIsBasicCommand(ArrayList<String> splitMessage) {
         ArrayList<String> commandList = new ArrayList<>(Arrays.asList("inv", "inventory", "get", "drop", "goto", "look"));
         for (String s : splitMessage) {
@@ -25,6 +24,11 @@ public class Command {
     public ArrayList<String> splitCommand(String command) {
         command = command.toLowerCase();
         return new ArrayList<>(Arrays.asList(command.split(" ")));
+    }
+
+    public String getEntityName(String command) {
+        ArrayList<String> split = splitCommand(command);
+        return String.join(" ", split.subList(2, split.size()));
     }
 
     public String processCommand(String command){
@@ -76,7 +80,7 @@ public class Command {
                 return getCommand(player, command);
             }
             case "drop" -> {
-                return dropCommand(player);
+                return dropCommand(player, command);
             }
             case "goto" -> {
                 return gotoCommand(player, command);
@@ -181,39 +185,38 @@ public class Command {
         // check if entity exists in location
         // remove artefact from location
         // add artefact in player inv
-        for(String artefactName: splitCommand(command)) {
-            if(currentLoc.checkIfArtefactExist(artefactName)) {
-                Artefact getArtefact = currentLoc.getArtefactByName(artefactName);
-                currentLoc.removeArtefacts(getArtefact);
-                player.addArtefactToPlayerInv(getArtefact);
-                getOutput.append("You picked up a ");
-                getOutput.append(artefactName);
-//                System.out.println(getOutput);
-                return getOutput.toString();
-            }
-        }
+        String artefactName = getEntityName(command);
 
-        // error handling: if artefact doesnt exist, print error
-        // TO DO!
-//        System.out.println("Failed to find the artefact in current location\n");
-        return null;
+        if(currentLoc.checkIfArtefactExist(artefactName)) {
+            Artefact getArtefact = currentLoc.getArtefactByName(artefactName);
+            currentLoc.removeArtefacts(getArtefact);
+            player.addArtefactToPlayerInv(getArtefact);
+            getOutput.append("You picked up a ");
+            getOutput.append(artefactName);
+        }
+        else {
+            getOutput.append("Failed to find the artefact in current location\n");
+        }
+        return getOutput.toString();
     }
 
-    public String dropCommand(Player player) {
+    public String dropCommand(Player player, String command) {
         Location currentLoc = getCurrLocation();
         StringBuilder dropOutput = new StringBuilder();
 
-        // check player's inv
-        for(Artefact artefact: player.getPlayerInv()) {
-            String artefactName = String.valueOf(artefact);
-            if (player.checkArtefactInInv(artefactName)) {
-                Artefact dropArtefact = player.getArtefactFromInv(artefactName);
-                currentLoc.addArtefact(dropArtefact);
-                player.dropArtefactFromPlayerInv(dropArtefact);
-                dropOutput.append("You dropped a");
-                dropOutput.append(artefactName);
-            }
+        String artefactName = getEntityName(command);
+
+        if(player.checkArtefactInInv(artefactName)) {
+            Artefact dropArtefact = player.getArtefactFromInv(artefactName);
+            currentLoc.addArtefact(dropArtefact);
+            player.dropArtefactFromPlayerInv(dropArtefact);
+            dropOutput.append("You dropped a ");
+            dropOutput.append(artefactName);
         }
+        else {
+            dropOutput.append("Artefact is not in inventory\n");
+        }
+
         return dropOutput.toString();
     }
 
@@ -221,28 +224,25 @@ public class Command {
         Location currentLoc = getCurrLocation();
         StringBuilder gotoOutput = new StringBuilder();
 
-        // get i = 2 (target) for locationName
-        for(String locationName: splitCommand(command)) {
-            if(currentLoc.checkIfPathsExist(locationName)) {
-                player.setPlayerLocation(locationName);
-                Location newLocation = getNewLocation(locationName);
-                gotoOutput.append("You are in: \n");
-                gotoOutput.append(newLocation.getDescription()).append("\n");
-                gotoOutput.append("You can see: ");
-                gotoOutput.append("\n");
-                showAllEntity(newLocation, gotoOutput);
-            }
+        String locationName = getEntityName(command);
+
+        if(currentLoc.checkIfPathsExist(locationName)) {
+            player.setPlayerLocation(locationName);
+            Location newLocation = getNewLocation(locationName);
+            gotoOutput.append("You are in: \n");
+            gotoOutput.append(newLocation.getDescription()).append("\n");
+            gotoOutput.append("You can see: ");
+            gotoOutput.append("\n");
+            showAllEntity(newLocation, gotoOutput);
+        }
+        else {
+            gotoOutput.append("Path does not exist\n");
         }
 
-
-//        System.out.println(gotoOutput);
-//        System.out.println("Failed to location new location in path\n");
         return gotoOutput.toString();
     }
 
     public String lookCommand() {
-//        System.out.println("reached look command");
-        // get player location -> get entities from location
         Location currLocation = getCurrLocation(); // use updated
         StringBuilder lookOutput = new StringBuilder();
 

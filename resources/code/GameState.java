@@ -44,19 +44,19 @@ public class GameState {
 
     // if the player alr exist, just get the player
     // from the hashmap itself and continue with the game
-//    public Player getCurrentPlayer() {
-//        return currentPlayer;
-//    }
+    public Player getCurrentPlayer() {
+        return currentPlayer;
+    }
 
     // check if the player is a new player or alr exist in the game
-//    public boolean playerExist(String playerName) {
-//        return playerHashMap.containsKey(playerName);
-//    }
+    public boolean playerExist(String playerName) {
+        return playerHashMap.containsKey(playerName);
+    }
 
     // if the player is new, set the playerHashMap
-//    public void setPlayerHashMap(String playerName,  Player player) {
-//        this.playerHashMap.put(playerName ,player);
-//    }
+    public void setPlayerHashMap(String playerName,  Player player) {
+        this.playerHashMap.put(playerName ,player);
+    }
 
     // new player: add the player into the hashmap
     public void addPlayerIntoMap(String playerName) {

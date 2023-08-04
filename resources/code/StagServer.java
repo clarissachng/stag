@@ -88,19 +88,19 @@ class  StagServer {
             String playerName = getPlayerName(input);
 
             // if the player is a new player, add the details for the game to start
-//            if (state.playerExist(playerName)) {
+            if (!state.playerExist(playerName)) {
             this.firstLocation = state.getFirstLoc();
-            this.thePlayer = new Player(playerName, firstLocation); // out of scope
+            this.thePlayer = new Player(playerName, firstLocation);
 
             thePlayer.setPlayerLocation(firstLocation);
             state.addPlayerIntoMap(playerName);
             state.setCurrentPlayer(thePlayer);
-//            } else {
-//                thePlayer = state.getCurrentPlayer();
-//                state.setPlayerHashMap(playerName, thePlayer);
-//
+            } else {
+                thePlayer = state.getCurrentPlayer();
+                state.setPlayerHashMap(playerName, thePlayer);
+
 //            // why cannot retrieve location after the else statement ;;
-//            }
+            }
 
             Command command = new Command(state, thePlayer);
             returnStatement = command.basicCommand(input, thePlayer);
