@@ -162,6 +162,7 @@ public class Command {
         // get player's inventory
         ArrayList<Artefact> invArtefacts = player.getPlayerInv();
         StringBuilder invOutput = new StringBuilder();
+
         if (!invArtefacts.isEmpty()) {
             invOutput.append("You have these items in inventory: \n");
 
